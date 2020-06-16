@@ -15,7 +15,9 @@
             <br>
             <v-row :align="'center'">
             
-            <v-text-field @keyup.enter="redirectChatRoom()" v-model='room_name' label="Enter the Chatroom" append-icon="mdi-arrow-right">Enter the room to join</v-text-field>
+            <v-text-field @keyup.enter="redirectChatRoom()" v-model='room_name' label="Enter the Chatroom" append-icon="mdi-arrow-right"
+            @click:append="redirectChatRoom()"
+            >Enter the room to join</v-text-field>
            
             
             </v-row>

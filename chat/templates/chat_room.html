@@ -34,13 +34,14 @@
                         placeholder="Type a message"
                         outlined
                         rounded
-                        append-icon="mdi-send"
+                        :append-icon="'mdi-send'"
                         @keyup.enter="sendMessage()"
                         v-model='message'
                         color="blue"
+                        @click:append="sendMessage()"
                         >
-        
-                        </v-text-field>
+                      </v-text-field>
+                                
     
                 </v-col>
 
@@ -127,7 +128,7 @@
         
       },
     })
-    let webob=new WebSocket('ws://127.0.0.1:8000/ws/chat/'+chatRoom)
+    let webob=new WebSocket('ws://'+window.location.host+'/ws/chat/'+chatRoom)
         console.log('chat mounted came' )
         webob.onopen=function(e){
                 console.log('successfully connection happened')
