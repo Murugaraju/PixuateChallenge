@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+    
+        <v-container fill-height class="mb-0 pb-0"  >
+            <v-row :justify="'center'">
+                <div id='ch'>{{chat_room}}</div>
+                <div class="indigo--text font-weight-medium" heading>Chat Room --- {{chat_room}}</div>
+            </v-row>
+                <v-col cols="12"  >
+                    
+                    <v-row 
+                    class="ma-1 pa-1"
+                    v-for="i in temp"
+                    :key="i.id"
+                    :justify="i.justify"
+                    
+                    >
+                    <div id='check' :class="i.justify=='start'?'left':'right'">
+                        ${i.message}
+                    </div>
+
+                    </v-row>
+                    <v-row :align="'end'" class="ma-0 pa-0">
+                        <v-text-field
+                        placeholder="Type a message"
+                        outlined
+                        rounded
+                        append-icon="mdi-send"
+                        @keyup.enter="sendMessage()"
+                        v-model='message'
+                        color="blue"
+                        >
+        
+                        </v-text-field>
+    
+                </v-col>
+
+        
+            
+                
+                </v-row>
+              
+        </v-container>
+      
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    let chatRoom= document.getElementById('ch').innerText
+
+    var app=new Vue({
+      el: '#app',
+      delimiters: ['${', '}'],
+
+      data(){
+          return{
+            temp:[
+                // {id:1,message:'1',justify:'start'},
+                // {id:2,message:'2',justify:'end'},
+                // {id:3,message:'2',justify:'start'},
+                // {id:4,message:'4',justify:'end'},
+                // {id:5,message:'5',justify:'start'},
+                // {id:6,message:'6',justify:'end'},
+
+            ],
+            message:'',
+            webob:undefined,
+            channelName:''
+            
+         
+          }
+      },
+      computed:{
+          messageArrayReverse(){
+              return this.temp.reverse()
+          }
+      },
+      vuetify: new Vuetify(),
+      methods:{
+          sendMessage(){
+              console.log('I am pressed in on key enter up',this.webob)
+            this.webob.send(this.message)
+
+            this.message=''
+
+          },
+          onMessage(event){
+            if(this.channelName===''){
+                this.channelName=event.data
+                console.log('channel name',this.channelName,typeof this.channelName)
+            }
+            else{
+                data=JSON.parse(event.data)
+                if(this.channelName==data['channelName']){
+                    console.log('yes',event)
+                    this.temp.push({message:data['message'],justify:'end',id:this.temp.length+1})
+                }
+                else{
+                    console.log('no',event)
+
+                    this.temp.push({message:data['message'],justify:'start',id:this.temp.length+1})
+
+                }
+            }
+            
+          },
+          
+      },
+      created(){
+        this.chatRoom= document.getElementById('ch').innerText
+
+      },
+      mounted:function (){
+
+        
+        
+      },
+    })
+    let webob=new WebSocket('ws://127.0.0.1:8000/ws/chat/'+chatRoom)
+        console.log('chat mounted came' )
+        webob.onopen=function(e){
+                console.log('successfully connection happened')
+                //main statement below
+                window.app.webob=webob
+        }
+        webob.onmessage= function(event){
+           
+            window.app.onMessage(event)
+        }
+        webob.onclose = function(event){
+            alert('connection lost to chat refresh page!')
+        }
+        webob.onerror = function(event){
+            alert('Seems error sending in message, refresh page')
+        }
+
+    
+
+    
+  </script>
+  <style>
+      #check{
+        border:1px solid black;
+        width:50%;
+        padding:6px;
+        border-radius:10px;
+        height: 40px;
+        
+      }
+      #check.left{
+        text-align:left;
+        border:1px solid pink;
+
+
+
+        
+      }
+      #check.right{
+        text-align:right;
+        border:1px solid green;
+
+
+      }
+      #ch{
+          display:none;
+      }
+  </style>
+</body>
+</html>
