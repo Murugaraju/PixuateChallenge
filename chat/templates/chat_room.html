@@ -4,54 +4,66 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
 <body>
   <div id="app">
     <v-app>
-    
-        <v-container fill-height class="mb-0 pb-0"  >
-            <v-row :justify="'center'">
-                <div id='ch'>{{chat_room}}</div>
-                <div class="indigo--text font-weight-medium" heading>Chat Room --- {{chat_room}}</div>
+      <v-main>
+        <v-container fluid  >
+            
+            <h1 id='ch'>{{chat_room}}</h1>
+            <h2 id='na'>{{name}}</h2>
+            
+            <v-row>
+              <v-col cols="4" >
+                <div class="contact-list">
+                  <h1>contact-list</h1>
+                </div>
+              </v-col>
+              <v-col cols="8">
+              <v-toolbar flat  class="indigo lighten-4">
+                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+                <v-toolbar-title>{{chat_room}}</v-toolbar-title>
+              </v-toolbar>
+              <div class="chat-window">
+                
+                
+                  <div class="message" :class="i.justify" v-for="i in temp" v-bind:key="i.id">
+                    <div class="message-name">${i.name}</div>
+                    <div class=" message-text">${i.message}</div>
+                    <div class="message-time"> time</div>
+                  </div>
+                  
+                  
+                 
+              </div>
+              <v-text-field 
+              outlined 
+              rounded 
+              placeholder="Type a message"
+              prepend-icon="mdi-tooltip-edit"
+              append-icon="mdi-send"
+              @click:append="sendMessage()"
+              v-model="message"
+              @keyup.enter="sendMessage()"
+              >
+
+              </v-text-field>
+              
+              </v-col>
             </v-row>
-                <v-col cols="12"  >
-                    
-                    <v-row 
-                    class="ma-1 pa-1"
-                    v-for="i in temp"
-                    :key="i.id"
-                    :justify="i.justify"
-                    
-                    >
-                    <div id='check' :class="i.justify=='start'?'left':'right'">
-                        ${i.message}
-                    </div>
-
-                    </v-row>
-                    <v-row :align="'end'" class="ma-0 pa-0">
-                        <v-text-field
-                        placeholder="Type a message"
-                        outlined
-                        rounded
-                        :append-icon="'mdi-send'"
-                        @keyup.enter="sendMessage()"
-                        v-model='message'
-                        color="blue"
-                        @click:append="sendMessage()"
-                        >
-                      </v-text-field>
-                                
-    
-                </v-col>
-
+           
+                
+           
         
             
                 
-                </v-row>
+           
               
         </v-container>
-      
+      </v-main>
     </v-app>
   </div>
 
@@ -59,6 +71,7 @@
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script>
     let chatRoom= document.getElementById('ch').innerText
+    let name = document.getElementById('na').innerText
 
     var app=new Vue({
       el: '#app',
@@ -67,17 +80,18 @@
       data(){
           return{
             temp:[
-                // {id:1,message:'1',justify:'start'},
-                // {id:2,message:'2',justify:'end'},
-                // {id:3,message:'2',justify:'start'},
-                // {id:4,message:'4',justify:'end'},
-                // {id:5,message:'5',justify:'start'},
-                // {id:6,message:'6',justify:'end'},
+                // {id:1,message:'1',justify:'others',name:'Others'},
+                // {id:2,message:'2',justify:'yours',name:'You'},
+                // {id:3,message:'2',justify:'others',name:'Others'},
+                // {id:4,message:'4',justify:'yours',name:'You'},
+                // {id:5,message:'5',justify:'others',name:'Others'},
+                // {id:6,message:'6',justify:'yours',name:'You'},
 
             ],
             message:'',
             webob:undefined,
-            channelName:''
+            channelName:'',
+            name:''
             
          
           }
@@ -105,12 +119,12 @@
                 data=JSON.parse(event.data)
                 if(this.channelName==data['channelName']){
                     console.log('yes',event)
-                    this.temp.push({message:data['message'],justify:'end',id:this.temp.length+1})
+                    this.temp.push({message:data['message'],justify:'yours',id:this.temp.length+1,name:'You'})
                 }
                 else{
                     console.log('no',event)
 
-                    this.temp.push({message:data['message'],justify:'start',id:this.temp.length+1})
+                    this.temp.push({message:data['message'],justify:'others',id:this.temp.length+1,name:data.username})
 
                 }
             }
@@ -118,10 +132,7 @@
           },
           
       },
-      created(){
-        this.chatRoom= document.getElementById('ch').innerText
-
-      },
+     
       mounted:function (){
 
         
@@ -129,11 +140,12 @@
       },
     })
     let webob=new WebSocket('ws://'+window.location.host+'/ws/chat/'+chatRoom)
-        console.log('chat mounted came' )
+        console.log('chat mounted came',name )
         webob.onopen=function(e){
                 console.log('successfully connection happened')
                 //main statement below
                 window.app.webob=webob
+                window.app.name=name
         }
         webob.onmessage= function(event){
            
@@ -151,29 +163,93 @@
     
   </script>
   <style>
-      #check{
-        border:1px solid black;
-        width:50%;
-        padding:6px;
-        border-radius:10px;
-        height: 40px;
-        
-      }
-      #check.left{
-        text-align:left;
-        border:1px solid pink;
 
+    .contact-list{
+      height: 100%;
+     
+      border:solid 2px red;
+      /* making only two grid with 10% height 90%height row wise */
+      
+    }
+     .chat-window{
+      border:solid 1px grey;
+      height: 90vh;
+      display: flex;
+      flex-direction: column-reverse;
+      padding:25px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border-bottom: none;
+      
+      
+    }
+     /* custom scroll for chat-window */
+  .chat-window::-webkit-scrollbar {
+    width: 0.5em;
+  }
+   
+  .chat-window::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    margin:2px 0px;
 
+  }
+   
+  .chat-window::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+    border-radius: 10px;
+  }
+    .message{
+      display: grid;
+      grid-template-columns: 90%;
+      margin-top:10px;
+    }
+    .yours{
+      justify-content: end;
+      justify-items: end;
+      
+    }
+    .yours .message-name{
+      color:green;
+    }
+    .yours .message-text{
+      border:solid 1px green;
+      padding:20px;
+      border-radius: 15px 15px 0px 15px;
+    }
+    .yours .message-time{
+      color:green;
+      
+      padding:0px 10px  10px 10px;
 
-        
-      }
-      #check.right{
-        text-align:right;
-        border:1px solid green;
+      
+    }
+    .others{
+      justify-content: start;
+      justify-items: start;
 
+    }
+    .others .message-name{
+      color:indigo;
+    }
+    .others .message-text{
+      
+      border:solid 1px indigo;
+      padding:20px;
+      border-radius: 15px 15px 15px 0px;
 
-      }
+    }
+    .others .message-time{
+      color:indigo;
+      padding:0px 10px  10px 10px;
+      
+    }
+      
       #ch{
+          display:none;
+      }
+      #na{
           display:none;
       }
   </style>

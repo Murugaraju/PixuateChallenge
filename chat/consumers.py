@@ -9,9 +9,9 @@ class ChatChannel(AsyncConsumer):
   
 
     async def websocket_connect(self,event):
-        # print('printing channel name--->',self.channel_name,self.scope)
+        # print('printing channel name--->',self.scope['query_string'].decode().split('=')[1])
         # print('printing channel layer--->',self.channel_layer)
-        
+        self.username=self.scope['query_string'].decode().split('=')[1]
         self.chat_room=self.scope['url_route']['kwargs']['chat_room']
         await self.send({
             'type':'websocket.accept'
@@ -27,7 +27,7 @@ class ChatChannel(AsyncConsumer):
     async def websocket_receive(self,event):
 
         print('message recieved',self,event)
-        data=json.dumps({'message':event['text'],'channelName':self.channel_name})
+        data=json.dumps({'message':event['text'],'channelName':self.channel_name,'username':self.username})
         await self.channel_layer.group_send(self.chat_room,{
             'type':'chat_message',
             'text':data

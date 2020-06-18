@@ -10,17 +10,22 @@
   <div id="app">
     <v-app>
       <v-main>
-        <v-container>
+        <v-container class="pa-2">
             <h1>Enter the Chat room you want to join</h1>
             <br>
-            <v-row :align="'center'">
+            <v-row :align="'center'" :justify="'space-between'">
             
-            <v-text-field @keyup.enter="redirectChatRoom()" v-model='room_name' label="Enter the Chatroom" append-icon="mdi-arrow-right"
+            <v-text-field  v-model='room_name' label="Enter the Chatroom" 
+            
+            ></v-text-field>
+          </v-row>
+            <v-row>
+            <v-text-field @keyup.enter="redirectChatRoom()" v-model='name' label="Enter Your name" append-icon="mdi-arrow-right"
             @click:append="redirectChatRoom()"
-            >Enter the room to join</v-text-field>
+            ></v-text-field>
            
+          </v-row>
             
-            </v-row>
         </v-container>
       </v-main>
     </v-app>
@@ -35,13 +40,15 @@
 
       data:()=>{
         return{
-            room_name:''
+            room_name:'',
+            name:''
         }
       },
       methods:{
         redirectChatRoom(){
             if(this.room_name!=''){
-                window.location.pathname='chat/'+this.room_name
+              console.log('came in redirect',this.name,this.room_name)
+                window.location.pathname='chat/'+this.room_name+'?'+'username='+this.name
             }
         }
       },
